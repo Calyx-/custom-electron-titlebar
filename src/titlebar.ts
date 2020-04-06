@@ -122,7 +122,7 @@ export class Titlebar extends Themebar {
 
 	private events: { [k: string]: Function; };
 	private callbacks: {
-		[event: string]: Promise<void>
+		[event: string]: () => Promise<void>
 	} = {};
 
 	constructor(options?: TitlebarOptions) {
@@ -295,7 +295,7 @@ export class Titlebar extends Themebar {
 						: this.currentWindow.close;
 					const callback = this.callbacks['before-close'];
 					if (callback) {
-						callback.then(() => {
+						callback().then(() => {
 							closeFn();
 						});
 					} else {
@@ -577,7 +577,7 @@ export class Titlebar extends Themebar {
 	 * @param event `before-close`
 	 * @param callback callback as promise
 	 */
-	public on(event: 'before-close', callback: Promise<void>): void {
+	public on(event: 'before-close', callback: () => Promise<void>): void {
 		this.callbacks[event] = callback;
 	}
 

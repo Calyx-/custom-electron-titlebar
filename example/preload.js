@@ -13,7 +13,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // delay close for 2s
-  titlebar.on('before-close', new Promise((resolve, reject) => {
+  titlebar.on('before-close', () => new Promise((resolve, reject) => {
     setTimeout(() => resolve(), 1000 * 2);
   }));
 

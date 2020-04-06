@@ -134,7 +134,7 @@ export declare class Titlebar extends Themebar {
      * @param event `before-close`
      * @param callback callback as promise
      */
-    on(event: 'before-close', callback: Promise<void>): void;
+    on(event: 'before-close', callback: () => Promise<void>): void;
     /**
      * Remove the titlebar, menubar and all methods.
      */
