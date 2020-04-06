@@ -7,10 +7,15 @@ const url = require('url');
 const customTitlebar = require('..'); // Delete this line and uncomment top line
 
 window.addEventListener('DOMContentLoaded', () => {
-  new customTitlebar.Titlebar({
+  const titlebar = new customTitlebar.Titlebar({
     backgroundColor: customTitlebar.Color.fromHex('#2f3241'),
     icon: url.format(path.join(__dirname, '/images', '/icon.png')),
   });
+
+  // delay close for 2s
+  titlebar.on('before-close', new Promise((resolve, reject) => {
+    setTimeout(() => resolve(), 1000 * 2);
+  }));
 
   const replaceText = (selector, text) => {
     const element = document.getElementById(selector)

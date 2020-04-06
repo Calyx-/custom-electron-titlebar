@@ -8,11 +8,11 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *-------------------------------------------------------------------------------------------------------*/
 
-import { isMacintosh, isWindows, isLinux } from './common/platform';
+import { BrowserWindow, remote } from 'electron';
 import { Color, RGBA } from './common/color';
-import { EventType, hide, show, removeClass, addClass, append, $, addDisposableListener, prepend, removeNode } from './common/dom';
+import { $, addClass, addDisposableListener, append, EventType, hide, prepend, removeClass, removeNode, show } from './common/dom';
+import { isLinux, isMacintosh, isWindows } from './common/platform';
 import { Menubar, MenubarOptions } from './menubar';
-import { remote, BrowserWindow } from 'electron';
 import { Theme, Themebar } from './themebar';
 
 const INACTIVE_FOREGROUND_DARK = Color.fromHex('#222222');
@@ -121,6 +121,9 @@ export class Titlebar extends Themebar {
 	private menubar: Menubar;
 
 	private events: { [k: string]: Function; };
+	private callbacks: {
+		[event: string]: Promise<void>
+	} = {};
 
 	constructor(options?: TitlebarOptions) {
 		super();
@@ -287,10 +290,16 @@ export class Titlebar extends Themebar {
 				addClass(closeIconContainer, 'inactive');
 			} else {
 				this._register(addDisposableListener(closeIcon, EventType.CLICK, e => {
-					if (this._options.hideWhenClickingClose) {
-						this.currentWindow.hide()
+					const closeFn = this._options.hideWhenClickingClose
+						? this.currentWindow.hide
+						: this.currentWindow.close;
+					const callback = this.callbacks['before-close'];
+					if (callback) {
+						callback.then(() => {
+							closeFn();
+						});
 					} else {
-						this.currentWindow.close()
+						closeFn();
 					}
 				}));
 			}
@@ -561,6 +570,15 @@ export class Titlebar extends Themebar {
 				this.title.style.marginLeft = 'auto';
 			}
 		}
+	}
+
+	/**
+	 * Adds a callback for the event.
+	 * @param event `before-close`
+	 * @param callback callback as promise
+	 */
+	public on(event: 'before-close', callback: Promise<void>): void {
+		this.callbacks[event] = callback;
 	}
 
 	/**
